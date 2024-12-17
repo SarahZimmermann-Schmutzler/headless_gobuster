@@ -48,34 +48,42 @@ def load_wordlist(wordlist_path: str) -> Optional[List[str]]:
         return None
 
 
-def check_for_dirs(driver: webdriver.Firefox, base_url: str, directory: str) -> None:
+def check_for_dirs(driver: webdriver.Firefox, base_content: str, base_url: str, directory: str) -> None:
     """
-    Checks if a directory exists on a web server by comparing the content of the base URL with the target URL.
+    Checks if a directory exists on a web server by comparing the base content with the target directory content.
+
+    The function navigates to the specified directory's URL and compares its page source to the base page source.
+    If the content is different and does not contain the base content, the directory is assumed to exist.
 
     Args:
-        driver (webdriver.Firefox): Selenium WebDriver instance.
+        driver (webdriver.Firefox): Selenium WebDriver instance used to load and interact with pages.
+        base_content (str): The HTML content of the base page.
         base_url (str): The base URL of the web application.
-        directory (str): The directory to check for existence.
+        directory (str): The specific directory to check.
 
     Returns:
         None
     """
     full_url = f"{base_url}/{directory}"
     try:
-        driver.get(base_url)
-        time.sleep(2)  # Allow page to load
+        #driver.get(base_url)
+        #time.sleep(2)  # Allow page to load
         #WebDriverWait(driver, 10).until(EC.text_to_be_present_in_element((By.ID, "status"), "Loaded"))
         #WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-        base_content = driver.page_source
+        #base_content = driver.page_source
 
         driver.get(full_url)
         time.sleep(2)  # Allow page to load
         #WebDriverWait(driver, 10).until(EC.text_to_be_present_in_element((By.ID, "status"), "Loaded"))
         #WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
         full_content = driver.page_source
+        #print(f"Full_{directory}: {full_content}")
 
-        if base_content != full_content:
+        if base_content != full_content and base_content not in full_content:
             print(f"[+] Directory found: {directory} --> {full_url}")
+        
+        #if base_content != full_content:
+            #print(f"[+] Directory found: {directory} --> {full_url}")
             #print(f"Found dir: {full_url}")
     except Exception as e:
         print(f"An error occurred with {full_url}: {str(e)}")
@@ -83,18 +91,35 @@ def check_for_dirs(driver: webdriver.Firefox, base_url: str, directory: str) -> 
 
 def scan_directories(driver: webdriver.Firefox, base_url: str, directories: List[str]) -> None:
     """
-    Iterates through a list of directories and checks each one for existence.
+    Scans a list of directories on a web server and identifies potential existing directories.
+
+    The function first loads the base URL and retrieves its content. Then, it iterates through the list of
+    directories, calling `check_for_dirs` to determine if each directory exists based on content differences.
 
     Args:
-        driver (webdriver.Firefox): Selenium WebDriver instance.
-        base_url (str): The base URL of the web application.
-        directories (List[str]): A list of directories to scan.
+        driver (webdriver.Firefox): Selenium WebDriver instance used to load pages.
+        base_url (str): The base URL of the web application to scan.
+        directories (List[str]): A list of directory names to test for existence.
 
     Returns:
         None
     """
-    for directory in directories:
-        check_for_dirs(driver, base_url, directory)
+    #for directory in directories:
+        #check_for_dirs(driver, base_url, directory)
+    
+    try:
+        # Load base content
+        driver.get(base_url)
+        time.sleep(2)  # Allow page to load
+        base_content = driver.page_source
+        #print(f"Base: {base_content}")
+
+        # Iterate through directories and compare base content with full_content
+        for directory in directories:
+            check_for_dirs(driver, base_content, base_url, directory)
+
+    except Exception as e:
+        print(f"An error occurred while loading base URL: {str(e)}")
 
 
 def main() -> None:
