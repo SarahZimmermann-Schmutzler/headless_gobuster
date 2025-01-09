@@ -48,7 +48,7 @@ def load_wordlist(wordlist_path: str) -> Optional[List[str]]:
         return None
 
 
-def check_for_dirs(driver: webdriver.Firefox, base_url: str, directory: str) -> None:
+def check_for_dirs(driver: webdriver.Firefox, base_url: str, directory: str, main_page_keywords: List[str]) -> None:
     """
     Checks if a directory exists on a web server by examining the page content of the target directory.
 
@@ -59,12 +59,12 @@ def check_for_dirs(driver: webdriver.Firefox, base_url: str, directory: str) -> 
         driver (webdriver.Firefox): Selenium WebDriver instance used to load and interact with pages.
         base_url (str): The base URL of the web application.
         directory (str): The specific directory to check.
+        main_page_keywords (List[str]): A list of keywords that indicate the main (landing) page content.
 
     Returns:
         None
     """
     full_url = f"{base_url}/{directory}"
-    main_page_keywords = ["Apple Juice", "Apple Pomace", "Banana Juice"]
     try:
         driver.get(full_url)
         time.sleep(2)  # Allow page to load
@@ -82,7 +82,7 @@ def check_for_dirs(driver: webdriver.Firefox, base_url: str, directory: str) -> 
         print(f"An error occurred with {full_url}: {str(e)}")
 
 
-def scan_directories(driver: webdriver.Firefox, base_url: str, directories: List[str]) -> None:
+def scan_directories(driver: webdriver.Firefox, base_url: str, directories: List[str], main_page_keywords: List[str]) -> None:
     """
     Scans a list of directories on a web server and identifies potential existing directories.
 
@@ -92,6 +92,7 @@ def scan_directories(driver: webdriver.Firefox, base_url: str, directories: List
         driver (webdriver.Firefox): Selenium WebDriver instance used to load pages.
         base_url (str): The base URL of the web application to scan.
         directories (List[str]): A list of directory names to test for existence.
+        main_page_keywords (List[str]): A list of keywords that indicate the main (landing) page content.
 
     Returns:
         None
@@ -99,7 +100,7 @@ def scan_directories(driver: webdriver.Firefox, base_url: str, directories: List
     try:
         # Iterate through directories and compare base content with full_content
         for directory in directories:
-            check_for_dirs(driver, base_url, directory)
+            check_for_dirs(driver, base_url, directory, main_page_keywords)
 
     except Exception as e:
         print(f"An error occurred while loading base URL: {str(e)}")
@@ -121,11 +122,16 @@ def main() -> None:
     # Parse arguments
     parser = argparse.ArgumentParser(description="My Gobuster version for dynamic web applications")
     parser.add_argument("-u", "--url", type=str, required=True, help="Target URL (e.g., http://127.0.0.1:3000/)")
+    parser.add_argument("-k", "--keywords", type=str, required=True, help="Comma-seperated keywords that define the base/main page")
     parser.add_argument("-w", "--wordlist", type=str, required=True, help="Path to wordlist file")
     args = parser.parse_args()
 
+    # Extract arguments
     url = args.url
     wordlist_path = args.wordlist
+    
+    # Convert keywords to list
+    main_page_keywords = args.keywords.split(',')
 
     # Configure WebDriver
     driver = configure_webdriver(headless=True)
@@ -137,7 +143,7 @@ def main() -> None:
             return
 
         # Scan directories
-        scan_directories(driver, url, directories)
+        scan_directories(driver, url, directories, main_page_keywords)
     except Exception as e:
         print(f"An error occurred: {str(e)}")
     finally:
