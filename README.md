@@ -25,10 +25,11 @@ The following table shows which functions **Headless_Gobuster** supports:
 | ---- | ------- | ----------- | -------- |
 | --help |  | Get a list of the available options | no
 | -u <br> --url |  | Target URL | yes |
+| -k <br> --keywords |  | Comma-seperated keywords that define the base/main page | yes |
 | -w <br> --wordlist |  | Path to wordlist file | yes |
 
 **Flow of the Program**
-- Parsing th given arguments (URL and wordlist).
+- Parsing th given arguments (URL, main page keywords and wordlist).
 - Configuring the Selenium WebDriver in headless mode.
 - Loading the wordlist from a file and returning it as a list of strings for later use.
 - Performing directory scanning by iterating through this list of directories and checking each one for existence on the given web server by comparing the content of the base URL with the target URL.
@@ -75,26 +76,27 @@ The following table shows which functions **Headless_Gobuster** supports:
 
 - To find the directories of a dynamic web application use the following command in your terminal:
     ```bash
-    python headless_gobuster.py -u [URL] -w [path/to/wordlist]
+    python headless_gobuster.py -u [URL] -k ["keyword1,keyword2"] -w [path/to/wordlist]
     ```
     - <ins>Example</ins>: Find the directories of the OWASP Juice Shop:  
         ```bash
-        python headless_gobuster.py -u "http://127.0.0.1:3000/#" -w "wordlist.txt"
+        python headless_gobuster.py -u "http://127.0.0.1:3000/#" -k "Apple Juice,Apple Pomace,Banana Juice" -w "wordlist.txt"
         ```
 - What you see after ... a while in the terminal:
     >i: If it takes so long, why no multithreading? Multithreading can lead to unexpected errors in Selenium, especially when a single WebDriver instance is used for multiple threads.  
     ```
-    [+] Directory found: 0 --> http://127.0.0.1:3000/#/0
 	[+] Directory found: about --> http://127.0.0.1:3000/#/about
 	[+] Directory found: accounting --> http://127.0.0.1:3000/#/accounting
 	[+] Directory found: administration --> http://127.0.0.1:3000/#/administration
 	[+] Directory found: basket --> http://127.0.0.1:3000/#/basket
 	[+] Directory found: chatbot --> http://127.0.0.1:3000/#/chatbot
 	[+] Directory found: contact --> http://127.0.0.1:3000/#/contact
+    [+] Directory found: register --> http://127.0.0.1:3000/#/forgot-password
 	[+] Directory found: login --> http://127.0.0.1:3000/#/login
+    [+] Directory found: register --> http://127.0.0.1:3000/#/photo-wall
+    [+] Directory found: register --> http://127.0.0.1:3000/#/recycle
 	[+] Directory found: register --> http://127.0.0.1:3000/#/register
 	[+] Directory found: score-board --> http://127.0.0.1:3000/#/score-board
-	[+] Directory found: search --> http://127.0.0.1:3000/#/search
     ```
 
 ## Additional Notes
